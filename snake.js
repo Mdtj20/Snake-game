@@ -12,7 +12,7 @@ let speed = 200;
 let isPaused = false;
 let highScores = JSON.parse(localStorage.getItem("highScores")) || [];
 const bgImage = new Image();
-bgImage.src = "pEAWq2Q.jpg";
+//bgImage.src = "https://s21.ax1x.com/2025/01/22/pEAWq2Q.jpg";
 
 // 食物
 const foodTypes = [
@@ -30,18 +30,18 @@ function setDifficulty(selectedSpeed) {
     gameLoop();
 }
 
-// 背景
+// 绘制背景
 function drawBackground() {
     ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
 }
 
-// 绘制方块
+// 绘制一个方块
 function drawBlock(x, y, color) {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, 20, 20);
 }
 
-// 生成食物
+// 随机生成食物
 function generateFood() {
     food = [];
     for (let i = 0; i < 3; i++) {
@@ -54,7 +54,7 @@ function generateFood() {
     }
 }
 
-// 生成障碍物
+// 随机生成障碍物
 function generateObstacles() {
     obstacles = [];
     for (let i = 0; i < 10; i++) {
