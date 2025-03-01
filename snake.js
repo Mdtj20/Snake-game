@@ -1,7 +1,7 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// 游戏变量
+// 初始化游戏变量
 let snake = [{ x: 400, y: 400 }];
 let direction = "RIGHT";
 let food = [];
@@ -11,15 +11,18 @@ let gameOver = false;
 let speed = 200;
 let isPaused = false;
 let highScores = JSON.parse(localStorage.getItem("highScores")) || [];
-const bgImage = new Image();
-//bgImage.src = "https://s21.ax1x.com/2025/01/22/pEAWq2Q.jpg";
 
-// 食物
+// 食物种类
 const foodTypes = [
     { color: "red", score: 1, effect: "normal" },
     { color: "blue", score: 3, effect: "speedUp" },
     { color: "yellow", score: 2, effect: "slowDown" }
 ];
+
+// 加载音效
+const eatSound = new Audio("eat.mp3");
+const crashSound = new Audio("crash.mp3");
+const gameOverSound = new Audio("gameover.mp3");
 
 // 设置难度
 function setDifficulty(selectedSpeed) {
@@ -32,7 +35,6 @@ function setDifficulty(selectedSpeed) {
 
 // 绘制背景
 function drawBackground() {
-    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
 }
 
 // 绘制一个方块
