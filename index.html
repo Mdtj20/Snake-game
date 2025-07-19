@@ -1,54 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>贪吃蛇游戏</title>
-    <style>
-        canvas {
-            border: 2px solid black;
-            display: block;
-            margin: 20px auto;
-        }
-        #difficulty, #highScoreList {
-            display: flex;
-            justify-content: center;
-            margin: 10px 0;
-            flex-direction: column;
-            align-items: center;
-        }
-        .difficulty-btn {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            border: 1px solid black;
-            background-color: lightgray;
-            border-radius: 5px;
-        }
-        .difficulty-btn:hover {
-            background-color: gray;
-            color: white;
-        }
-        #highScoreList {
-            max-width: 400px;
-            padding: 10px;
-            border: 1px solid black;
-            background: #f9f9f9;
-            text-align: center;
-            border-radius: 5px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>贪吃蛇小游戏</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+      background: #f9f9f9;
+    }
+    #gameCanvas {
+      border: 2px solid #000;
+      background: #fff;
+    }
+    #difficulty {
+      margin-bottom: 10px;
+    }
+    #difficulty button,
+    #restartBtn {
+      padding: 8px 16px;
+      margin: 5px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #difficulty button:hover,
+    #restartBtn:hover {
+      background-color: #45a049;
+    }
+    #highScores {
+      margin-top: 20px;
+    }
+    #highScores h3 {
+      margin-bottom: 5px;
+    }
+    #highScores ol {
+      list-style: decimal inside;
+      padding: 0;
+      margin: 0 auto;
+      max-width: 200px;
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
-    <h1 style="text-align: center;">贪吃蛇游戏</h1>
-    <div id="difficulty">
-        <button class="difficulty-btn" onclick="setDifficulty(300)">简单</button>
-        <button class="difficulty-btn" onclick="setDifficulty(200)">普通</button>
-        <button class="difficulty-btn" onclick="setDifficulty(100)">困难</button>
-    </div>
-    <canvas id="gameCanvas" width="800" height="800"></canvas>
-    <div id="highScoreList"></div>
-    <script src="snake.js"></script>
+
+  <h1>贪吃蛇小游戏</h1>
+
+  <div id="difficulty">
+    <button onclick="setDifficulty(300)">简单</button>
+    <button onclick="setDifficulty(200)">普通</button>
+    <button onclick="setDifficulty(100)">困难</button>
+  </div>
+
+  <canvas id="gameCanvas" width="800" height="800"></canvas>
+
+  <div>
+    <button id="restartBtn" style="display: none;" onclick="restartGame()">重新开始</button>
+  </div>
+
+  <div id="highScores">
+    <h3>高分榜</h3>
+    <ol id="scoreList"></ol>
+  </div>
+
+  <!-- 在这里引入你的 JS 文件或放入 JS 代码 -->
+  <script src="snake.js"></script> <!-- 或直接放 JS 代码 -->
+
 </body>
 </html>
