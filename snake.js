@@ -10,6 +10,7 @@ let score = 0;
 let gameOver = false;
 let speed = 200;
 let isPaused = false;
+let intervalId;
 let highScores = JSON.parse(localStorage.getItem("highScores")) || [];
 
 const foodTypes = [
@@ -29,7 +30,7 @@ function setDifficulty(selectedSpeed) {
     document.getElementById("difficulty").style.display = "none";
     generateFood();
     generateObstacles();
-    gameLoop();
+    startGameLoop();
 }
 
 function drawBlock(x, y, color) {
@@ -47,21 +48,22 @@ function generateFood() {
             ...type
         };
         if (!obstacles.some(ob => ob.x === newFood.x && ob.y === newFood.y) &&
-            !food.some(f => f.x === newFood.x && f.y === newFood.y)) {
+            !food.some(f => f.x === newFood.x && f.y === newFood.y) &&
+            !snake.some(s => s.x === newFood.x && s.y === newFood.y)) {
             food.push(newFood);
         }
     }
 }
 
-function generateObstacles() {
-    obstacles = [];
-    while (obstacles.length < 10) {
+function generateObstacles(count = 10) {
+    while (obstacles.length < count) {
         let newOb = {
             x: Math.floor(Math.random() * 40) * 20,
             y: Math.floor(Math.random() * 40) * 20
         };
         if (!food.some(f => f.x === newOb.x && f.y === newOb.y) &&
-            !obstacles.some(ob => ob.x === newOb.x && ob.y === newOb.y)) {
+            !obstacles.some(ob => ob.x === newOb.x && ob.y === newOb.y) &&
+            !snake.some(s => s.x === newOb.x && s.y === newOb.y)) {
             obstacles.push(newOb);
         }
     }
@@ -92,8 +94,20 @@ function updateSnake() {
     if (eatenFood) {
         if (eatSound.readyState >= 2) eatSound.play();
         score += eatenFood.score;
-        if (eatenFood.effect === "speedUp" && speed > 50) speed -= 10;
-        if (eatenFood.effect === "slowDown") speed += 10;
+
+        if (score % 10 === 0) {
+            generateObstacles(obstacles.length + 1);
+        }
+
+        if (eatenFood.effect === "speedUp" && speed > 50) {
+            speed -= 10;
+            restartGameLoop();
+        }
+        if (eatenFood.effect === "slowDown") {
+            speed += 10;
+            restartGameLoop();
+        }
+
         food.splice(food.indexOf(eatenFood), 1);
         generateFood();
     } else {
@@ -119,14 +133,38 @@ function gameLoop() {
         updateSnake();
         render();
     }
-    setTimeout(gameLoop, speed);
+}
+
+function startGameLoop() {
+    clearInterval(intervalId);
+    intervalId = setInterval(gameLoop, speed);
+}
+
+function restartGameLoop() {
+    clearInterval(intervalId);
+    intervalId = setInterval(gameLoop, speed);
 }
 
 function endGame() {
     gameOver = true;
+    clearInterval(intervalId);
     alert(`游戏结束！得分: ${score}`);
     updateHighScores(score);
     displayHighScores();
+}
+
+function updateHighScores(score) {
+    highScores.push(score);
+    highScores.sort((a, b) => b - a);
+    highScores = highScores.slice(0, 5);
+    localStorage.setItem("highScores", JSON.stringify(highScores));
+}
+
+function displayHighScores() {
+    const hsElement = document.getElementById("highScores");
+    if (!hsElement) return;
+    hsElement.innerHTML = "<h3>高分榜</h3>" +
+        highScores.map((s, i) => `<div>#${i + 1}: ${s}</div>`).join("");
 }
 
 document.addEventListener("keydown", e => {
