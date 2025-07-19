@@ -19,13 +19,6 @@ const foodTypes = [
   { color: "yellow", score: 2, effect: "slowDown" }
 ];
 
-const eatSound = new Audio("eat.mp3");
-const crashSound = new Audio("crash.mp3");
-const gameOverSound = new Audio("gameover.mp3");
-
-eatSound.onerror = crashSound.onerror = gameOverSound.onerror = () =>
-  console.warn("音效加载失败");
-
 function setDifficulty(selectedSpeed) {
   speed = selectedSpeed;
   document.getElementById("difficulty").style.display = "none";
@@ -110,7 +103,6 @@ function updateSnake() {
     if (eatSound.readyState >= 2) eatSound.play();
     score += eatenFood.score;
 
-    // 每10分增加障碍物
     if (score % 10 === 0) {
       generateObstacles(obstacles.length + 1);
     }
