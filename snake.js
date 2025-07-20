@@ -119,7 +119,7 @@ function render() {
   snake.forEach(seg => drawBlock(seg.x, seg.y, "green"));
   food.forEach(f => drawBlock(f.x, f.y, f.color));
   obstacles.forEach(ob => drawBlock(ob.x, ob.y, "gray"));
-  ctx.fillStyle = "black";
+  ctx.fillStyle = document.body.classList.contains("dark-mode") ? "white" : "black";
   ctx.font = "20px Arial";
   ctx.fillText(`得分: ${score}`, 10, 30);
 }
@@ -194,4 +194,24 @@ document.addEventListener("keydown", e => {
   if (e.key === "ArrowRight" && direction !== "LEFT") nextDirection = "RIGHT";
   if (e.key === " ") isPaused = !isPaused;
   if (e.key.toLowerCase() === "r" && gameOver) restartGame();
+});
+
+const modeBtn = document.getElementById("toggleModeBtn");
+
+function setMode(mode) {
+  document.body.classList.remove("light-mode", "dark-mode");
+  document.body.classList.add(`${mode}-mode`);
+  localStorage.setItem("themeMode", mode);
+  modeBtn.textContent = mode === "dark" ? "切换白天模式" : "切换夜间模式";
+}
+
+modeBtn.addEventListener("click", () => {
+  const currentMode = document.body.classList.contains("dark-mode") ? "dark" : "light";
+  const newMode = currentMode === "dark" ? "light" : "dark";
+  setMode(newMode);
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem("themeMode") || "light";
+  setMode(saved);
 });
