@@ -10,7 +10,8 @@ let score = 0;
 let gameOver = false;
 let speed = 200;
 let isPaused = false;
-let intervalId;
+let obstacleIncreaseThreshold = 10;
+
 let highScores = JSON.parse(localStorage.getItem("highScores")) || [];
 
 const foodTypes = [
@@ -22,9 +23,11 @@ const foodTypes = [
 function setDifficulty(selectedSpeed) {
   speed = selectedSpeed;
   document.getElementById("difficulty").style.display = "none";
+  document.getElementById("restartBtn").style.display = "inline-block";
+  resetGame();
   generateFood();
-  generateObstacles();
-  startGameLoop();
+  generateObstacles(10);
+  gameLoop();
 }
 
 function drawBlock(x, y, color) {
@@ -51,19 +54,20 @@ function generateFood() {
   }
 }
 
-function generateObstacles(count = 10) {
-  while (obstacles.length < count) {
-    let newOb = {
-      x: Math.floor(Math.random() * 40) * 20,
-      y: Math.floor(Math.random() * 40) * 20
-    };
-    if (
-      !food.some(f => f.x === newOb.x && f.y === newOb.y) &&
-      !obstacles.some(ob => ob.x === newOb.x && ob.y === newOb.y) &&
-      !snake.some(s => s.x === newOb.x && s.y === newOb.y)
-    ) {
-      obstacles.push(newOb);
-    }
+function generateObstacles(count = 1) {
+  for (let i = 0; i < count; i++) {
+    let newOb;
+    do {
+      newOb = {
+        x: Math.floor(Math.random() * 40) * 20,
+        y: Math.floor(Math.random() * 40) * 20
+      };
+    } while (
+      obstacles.some(ob => ob.x === newOb.x && ob.y === newOb.y) ||
+      food.some(f => f.x === newOb.x && f.y === newOb.y) ||
+      snake.some(s => s.x === newOb.x && s.y === newOb.y)
+    );
+    obstacles.push(newOb);
   }
 }
 
@@ -82,7 +86,7 @@ function updateSnake() {
   head.y = (head.y + canvas.height) % canvas.height;
 
   if (
-    snake.some(seg => seg.x === head.x && seg.y === head.y) ||
+    snake.some(segment => segment.x === head.x && segment.y === head.y) ||
     obstacles.some(ob => ob.x === head.x && ob.y === head.y)
   ) {
     endGame();
@@ -92,21 +96,15 @@ function updateSnake() {
   const eatenFood = food.find(f => f.x === head.x && f.y === head.y);
   if (eatenFood) {
     score += eatenFood.score;
-
-    if (score % 10 === 0) {
-      generateObstacles(obstacles.length + 1);
-    }
-
-    if (eatenFood.effect === "speedUp" && speed > 50) {
-      speed -= 10;
-      restartGameLoop();
-    } else if (eatenFood.effect === "slowDown") {
-      speed += 10;
-      restartGameLoop();
-    }
-
+    if (eatenFood.effect === "speedUp" && speed > 50) speed -= 10;
+    if (eatenFood.effect === "slowDown") speed += 10;
     food.splice(food.indexOf(eatenFood), 1);
     generateFood();
+
+    if (score >= obstacleIncreaseThreshold) {
+      generateObstacles(1);
+      obstacleIncreaseThreshold += 10;
+    }
   } else {
     snake.pop();
   }
@@ -116,10 +114,11 @@ function updateSnake() {
 
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  snake.forEach(seg => drawBlock(seg.x, seg.y, "green"));
+  snake.forEach(segment => drawBlock(segment.x, segment.y, "green"));
   food.forEach(f => drawBlock(f.x, f.y, f.color));
   obstacles.forEach(ob => drawBlock(ob.x, ob.y, "gray"));
-  ctx.fillStyle = document.body.classList.contains("dark-mode") ? "white" : "black";
+
+  ctx.fillStyle = "black";
   ctx.font = "20px Arial";
   ctx.fillText(`得分: ${score}`, 10, 30);
 }
@@ -130,44 +129,37 @@ function gameLoop() {
     updateSnake();
     render();
   }
-}
-
-function startGameLoop() {
-  clearInterval(intervalId);
-  intervalId = setInterval(gameLoop, speed);
-}
-
-function restartGameLoop() {
-  clearInterval(intervalId);
-  intervalId = setInterval(gameLoop, speed);
+  setTimeout(gameLoop, speed);
 }
 
 function endGame() {
   gameOver = true;
-  clearInterval(intervalId);
   alert(`游戏结束！得分: ${score}`);
   updateHighScores(score);
   displayHighScores();
-  document.getElementById("restartBtn").style.display = "inline-block";
 }
 
 function restartGame() {
-  snake = [{ x: 400, y: 400 }];
-  direction = nextDirection = "RIGHT";
-  food = [];
-  obstacles = [];
-  score = 0;
-  speed = 200;
-  isPaused = false;
-  gameOver = false;
-  document.getElementById("restartBtn").style.display = "none";
+  resetGame();
   generateFood();
-  generateObstacles();
-  startGameLoop();
+  generateObstacles(10);
+  gameLoop();
 }
 
-function updateHighScores(score) {
-  highScores.push(score);
+function resetGame() {
+  snake = [{ x: 400, y: 400 }];
+  direction = "RIGHT";
+  nextDirection = "RIGHT";
+  score = 0;
+  food = [];
+  obstacles = [];
+  isPaused = false;
+  gameOver = false;
+  obstacleIncreaseThreshold = 10;
+}
+
+function updateHighScores(newScore) {
+  highScores.push(newScore);
   highScores.sort((a, b) => b - a);
   highScores = highScores.slice(0, 5);
   localStorage.setItem("highScores", JSON.stringify(highScores));
@@ -175,25 +167,24 @@ function updateHighScores(score) {
 
 function displayHighScores() {
   const list = document.getElementById("scoreList");
-  if (!list) return;
   list.innerHTML = "";
   highScores.forEach(score => {
     const li = document.createElement("li");
-    li.textContent = `${score} 分`;
+    li.textContent = score;
     list.appendChild(li);
   });
 }
 
 document.addEventListener("keydown", e => {
-  const keysToBlock = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "];
-  if (keysToBlock.includes(e.key)) e.preventDefault();
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
+    e.preventDefault();
+  }
 
   if (e.key === "ArrowUp" && direction !== "DOWN") nextDirection = "UP";
   if (e.key === "ArrowDown" && direction !== "UP") nextDirection = "DOWN";
   if (e.key === "ArrowLeft" && direction !== "RIGHT") nextDirection = "LEFT";
   if (e.key === "ArrowRight" && direction !== "LEFT") nextDirection = "RIGHT";
   if (e.key === " ") isPaused = !isPaused;
-  if (e.key.toLowerCase() === "r" && gameOver) restartGame();
 });
 
 const modeBtn = document.getElementById("toggleModeBtn");
@@ -201,17 +192,21 @@ const modeBtn = document.getElementById("toggleModeBtn");
 function setMode(mode) {
   document.body.classList.remove("light-mode", "dark-mode");
   document.body.classList.add(`${mode}-mode`);
-  localStorage.setItem("themeMode", mode);
-  modeBtn.textContent = mode === "dark" ? "切换白天模式" : "切换夜间模式";
+  if (modeBtn) {
+    modeBtn.textContent = mode === "dark" ? "切换白天模式" : "切换夜间模式";
+  }
 }
 
-modeBtn.addEventListener("click", () => {
-  const currentMode = document.body.classList.contains("dark-mode") ? "dark" : "light";
-  const newMode = currentMode === "dark" ? "light" : "dark";
-  setMode(newMode);
-});
+if (modeBtn) {
+  modeBtn.addEventListener("click", () => {
+    const current = document.body.classList.contains("dark-mode") ? "dark" : "light";
+    const next = current === "dark" ? "light" : "dark";
+    setMode(next);
+  });
+}
 
 window.addEventListener("DOMContentLoaded", () => {
-  const saved = localStorage.getItem("themeMode") || "light";
-  setMode(saved);
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  setMode(prefersDark ? "dark" : "light");
+  displayHighScores();
 });
