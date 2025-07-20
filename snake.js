@@ -195,10 +195,14 @@ function displayHighScores() {
 }
 
 document.addEventListener("keydown", e => {
-  if (e.key === "ArrowUp" && direction !== "DOWN") nextDirection = "UP";
-  if (e.key === "ArrowDown" && direction !== "UP") nextDirection = "DOWN";
-  if (e.key === "ArrowLeft" && direction !== "RIGHT") nextDirection = "LEFT";
-  if (e.key === "ArrowRight" && direction !== "LEFT") nextDirection = "RIGHT";
-  if (e.key === " ") isPaused = !isPaused;
-  if (e.key.toLowerCase() === "r" && gameOver) restartGame();
+    const keysToBlock = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "];
+
+    if (keysToBlock.includes(e.key)) e.preventDefault();
+
+    if (e.key === "ArrowUp" && direction !== "DOWN") nextDirection = "UP";
+    if (e.key === "ArrowDown" && direction !== "UP") nextDirection = "DOWN";
+    if (e.key === "ArrowLeft" && direction !== "RIGHT") nextDirection = "LEFT";
+    if (e.key === "ArrowRight" && direction !== "LEFT") nextDirection = "RIGHT";
+    if (e.key === " ") isPaused = !isPaused;
+    if (e.key.toLowerCase() === "r" && gameOver) restartGame();
 });
