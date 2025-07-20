@@ -72,18 +72,10 @@ function updateSnake() {
   const head = { ...snake[0] };
 
   switch (direction) {
-    case "UP":
-      head.y -= 20;
-      break;
-    case "DOWN":
-      head.y += 20;
-      break;
-    case "LEFT":
-      head.x -= 20;
-      break;
-    case "RIGHT":
-      head.x += 20;
-      break;
+    case "UP": head.y -= 20; break;
+    case "DOWN": head.y += 20; break;
+    case "LEFT": head.x -= 20; break;
+    case "RIGHT": head.x += 20; break;
   }
 
   head.x = (head.x + canvas.width) % canvas.width;
@@ -93,14 +85,12 @@ function updateSnake() {
     snake.some(seg => seg.x === head.x && seg.y === head.y) ||
     obstacles.some(ob => ob.x === head.x && ob.y === head.y)
   ) {
-    if (gameOverSound.readyState >= 2) gameOverSound.play();
     endGame();
     return;
   }
 
   const eatenFood = food.find(f => f.x === head.x && f.y === head.y);
   if (eatenFood) {
-    if (eatSound.readyState >= 2) eatSound.play();
     score += eatenFood.score;
 
     if (score % 10 === 0) {
@@ -195,14 +185,13 @@ function displayHighScores() {
 }
 
 document.addEventListener("keydown", e => {
-    const keysToBlock = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "];
+  const keysToBlock = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "];
+  if (keysToBlock.includes(e.key)) e.preventDefault();
 
-    if (keysToBlock.includes(e.key)) e.preventDefault();
-
-    if (e.key === "ArrowUp" && direction !== "DOWN") nextDirection = "UP";
-    if (e.key === "ArrowDown" && direction !== "UP") nextDirection = "DOWN";
-    if (e.key === "ArrowLeft" && direction !== "RIGHT") nextDirection = "LEFT";
-    if (e.key === "ArrowRight" && direction !== "LEFT") nextDirection = "RIGHT";
-    if (e.key === " ") isPaused = !isPaused;
-    if (e.key.toLowerCase() === "r" && gameOver) restartGame();
+  if (e.key === "ArrowUp" && direction !== "DOWN") nextDirection = "UP";
+  if (e.key === "ArrowDown" && direction !== "UP") nextDirection = "DOWN";
+  if (e.key === "ArrowLeft" && direction !== "RIGHT") nextDirection = "LEFT";
+  if (e.key === "ArrowRight" && direction !== "LEFT") nextDirection = "RIGHT";
+  if (e.key === " ") isPaused = !isPaused;
+  if (e.key.toLowerCase() === "r" && gameOver) restartGame();
 });
